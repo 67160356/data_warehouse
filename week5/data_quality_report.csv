@@ -1,0 +1,11 @@
+﻿Metric,Before,After
+Total Rows,630,612
+Missing Email,50,0
+Missing Province,12,0
+Exact Duplicates,18,0
+Invalid Dates (Fallback),3,7
+Mismatched Amounts (>1 Baht),51,50
+Invalid Quantities (<1 or >20),3,3
+Outliers Capped (Non-Promo),0,19
+Late Loads (>24 Hours),0,38
+Invalid Statuses,16,5
