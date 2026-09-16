@@ -1,0 +1,3 @@
+source	line_count	order_count	revenue
+before_join (fact_sales)	8	6	1390
+after_join (sales view)	8	6	1390

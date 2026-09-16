@@ -1,0 +1,19 @@
+BEFORE  before JOIN (fact_sales): lines=8 orders=6 revenue=1390
+BEFORE  after  JOIN (sales view): lines=8 orders=6 revenue=1390
+
+COMMIT ok. PRAGMA foreign_key_check -> no violations
+
+AFTER   before JOIN (fact_sales): lines=11 orders=8 revenue=1900
+AFTER   after  JOIN (sales view): lines=11 orders=8 revenue=1900
+
+delta: +3 lines, +2 orders, +510 baht
+
+New pivot (province x month) with October:
+ month     2026-08  2026-09  2026-10  Total
+province                                  
+Bangkok       310      540      200   1050
+Chonburi      180      360      310    850
+Total         490      900      510   1900
+
+Note: the q08 CASE WHEN pivot still shows only aug/sep - a hand-written
+CASE list does NOT grow by itself, while pandas columns="month" adds 2026-10 automatically.

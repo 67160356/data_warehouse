@@ -1,0 +1,178 @@
+===== q01.sql =====
+-- q01: Grain check. 1 row in fact_sales = 1 product line inside 1 order.
+SELECT COUNT(*)                   AS line_count,
+       COUNT(DISTINCT order_id)   AS order_count,
+       SUM(quantity)              AS units,
+       SUM(amount)                AS revenue
+FROM sales;
+--- output ---
+line_count	order_count	units	revenue
+8	6	23	1390
+
+===== q02.sql =====
+-- q02: Roll-up to month level.
+SELECT month,
+       SUM(amount) AS revenue
+FROM sales
+GROUP BY month
+ORDER BY month;
+--- output ---
+month	revenue
+2026-08	490
+2026-09	900
+
+===== q03.sql =====
+-- q03: Roll-up month x province (adds the place dimension).
+SELECT month,
+       province,
+       SUM(amount) AS revenue
+FROM sales
+GROUP BY month, province
+ORDER BY month, province;
+--- output ---
+month	province	revenue
+2026-08	Bangkok	310
+2026-08	Chonburi	180
+2026-09	Bangkok	540
+2026-09	Chonburi	360
+
+===== q04.sql =====
+-- q04: Drill-down on the time hierarchy, month -> day, September only.
+SELECT full_date,
+       SUM(amount) AS revenue
+FROM sales
+WHERE month = '2026-09'
+GROUP BY full_date
+ORDER BY full_date;
+--- output ---
+full_date	revenue
+2026-09-09	360
+2026-09-10	300
+2026-09-11	240
+
+===== q05.sql =====
+-- q05: Slice = fix ONE dimension (month = September), summarise by province.
+SELECT province,
+       SUM(amount) AS revenue
+FROM sales
+WHERE month = '2026-09'
+GROUP BY province
+ORDER BY revenue DESC, province;
+--- output ---
+province	revenue
+Bangkok	540
+Chonburi	360
+
+===== q06.sql =====
+-- q06: Dice = fix SEVERAL dimensions at once (month + category + province list).
+SELECT province,
+       category,
+       SUM(amount) AS revenue
+FROM sales
+WHERE month = '2026-09'
+  AND category = 'Drink'
+  AND province IN ('Bangkok', 'Chonburi')
+GROUP BY province, category
+ORDER BY revenue DESC, province;
+--- output ---
+province	category	revenue
+Bangkok	Drink	300
+Chonburi	Drink	200
+
+===== q07.sql =====
+-- q07: WHERE filters rows BEFORE grouping, HAVING filters groups AFTER SUM.
+SELECT province,
+       SUM(amount) AS revenue
+FROM sales
+WHERE month = '2026-09'
+GROUP BY province
+HAVING SUM(amount) > 400
+ORDER BY revenue DESC, province;
+--- output ---
+province	revenue
+Bangkok	540
+
+===== q08.sql =====
+-- q08: SQL pivot. Rows = province, columns = aug / sep / total.
+SELECT province,
+       SUM(CASE WHEN month = '2026-08' THEN amount ELSE 0 END) AS aug,
+       SUM(CASE WHEN month = '2026-09' THEN amount ELSE 0 END) AS sep,
+       SUM(amount)                                            AS total
+FROM sales
+GROUP BY province
+ORDER BY province;
+--- output ---
+province	aug	sep	total
+Bangkok	310	540	850
+Chonburi	180	360	540
+
+===== q09.sql =====
+-- q09: Monthly rows plus a grand-total row via UNION ALL.
+-- SQLite will not accept an expression in ORDER BY on a compound SELECT,
+-- so the sort key is built inside a subquery instead.
+SELECT period, revenue
+FROM (
+    SELECT month       AS period,
+           SUM(amount) AS revenue,
+           0           AS sort_key
+    FROM sales
+    GROUP BY month
+    UNION ALL
+    SELECT 'ALL',
+           SUM(amount),
+           1
+    FROM sales
+)
+ORDER BY sort_key, period;
+--- output ---
+period	revenue
+2026-08	490
+2026-09	900
+ALL	1390
+
+===== q10.sql =====
+-- q10: AOV must divide by DISTINCT orders, not by line count.
+-- *1.0 forces float division (SQLite would do integer division otherwise).
+SELECT SUM(amount)                                              AS revenue,
+       COUNT(DISTINCT order_id)                                 AS orders,
+       ROUND(SUM(amount) * 1.0 / COUNT(DISTINCT order_id), 2)   AS aov,
+       ROUND(AVG(amount), 2)                                    AS avg_line
+FROM sales;
+--- output ---
+revenue	orders	aov	avg_line
+1390	6	231.67	173.75
+
+===== q11.sql =====
+-- q11: Same numbers before and after the JOIN => no fan-out, no dropped rows.
+SELECT 'before_join (fact_sales)' AS source,
+       COUNT(*)                   AS line_count,
+       COUNT(DISTINCT order_id)   AS order_count,
+       SUM(quantity * unit_price) AS revenue
+FROM fact_sales
+UNION ALL
+SELECT 'after_join (sales view)',
+       COUNT(*),
+       COUNT(DISTINCT order_id),
+       SUM(amount)
+FROM sales;
+--- output ---
+source	line_count	order_count	revenue
+before_join (fact_sales)	8	6	1390
+after_join (sales view)	8	6	1390
+
+===== q12.sql =====
+-- q12: Drill-through from the Bangkok / September cell down to raw lines.
+SELECT order_id,
+       line_no,
+       product_name,
+       quantity,
+       amount
+FROM sales
+WHERE province = 'Bangkok'
+  AND month    = '2026-09'
+ORDER BY order_id, line_no;
+--- output ---
+order_id	line_no	product_name	quantity	amount
+O1005	1	Tea	6	300
+O1006	1	Cookie	3	240
+

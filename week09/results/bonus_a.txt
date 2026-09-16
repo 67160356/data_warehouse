@@ -1,0 +1,14 @@
+===== bonus_a1 =====
+store_name	province	revenue	orders	aov
+Nimman	Chiang Mai	145280	317	458.3
+Pattaya	Chonburi	141215	319	442.68
+Muang Rayong	Rayong	136710	293	466.59
+===== bonus_a2 =====
+month	revenue	orders	aov_month
+2026-08	273650	603	453.81
+2026-09	270160	586	461.02
+2026-10	264145	611	432.32
+===== comparison =====
+AOV whole period (weighted) = 807955/1800 = 448.86 baht
+Unweighted mean of monthly AOV = 449.05 baht
+difference = -0.19 baht -> months with more orders pull the weighted AOV toward them

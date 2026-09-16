@@ -1,0 +1,5 @@
+per month: [('2026-08', 490, 3, 8, 163.33), ('2026-09', 900, 3, 15, 300.0)]
+per province: [('Bangkok', 850, 4), ('Chonburi', 540, 2)]
+per category: [('Drink', 750), ('Snack', 640)]
+per order: [('O1001', '2026-08', 'Chonburi', 180), ('O1002', '2026-08', 'Bangkok', 150), ('O1003', '2026-08', 'Bangkok', 160), ('O1004', '2026-09', 'Chonburi', 360), ('O1005', '2026-09', 'Bangkok', 300), ('O1006', '2026-09', 'Bangkok', 240)]
+double count demo (q09 summed): [(2780,)]

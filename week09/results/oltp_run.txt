@@ -1,0 +1,8 @@
+--- RUN 1 ---
+Before: [('O1004', 'PENDING')]
+rowcount: 1
+After: [('O1004', 'PAID')]
+--- RUN 2 ---
+Before: [('O1004', 'PAID')]
+rowcount: 0
+After: [('O1004', 'PAID')]
